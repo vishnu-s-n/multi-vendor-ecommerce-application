@@ -20,6 +20,7 @@ class Upcoming_Product_Admin(admin.ModelAdmin):
     inlines = (UpProductImage,)
 
 
+
 admin.site.register(Section)
 admin.site.register(Product, Product_Admin)
 admin.site.register(ProductImages)
@@ -36,3 +37,6 @@ admin.site.register(Blog)
 admin.site.register(BlogSection)
 admin.site.register(Color)
 admin.site.register(Brand)
+admin.site.register(CouponCode)
+admin.site.register(Order)
+admin.site.register(OrderItem)

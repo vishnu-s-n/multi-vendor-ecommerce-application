@@ -18,33 +18,46 @@ from django.contrib import admin
 from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
-from core.views import Base,Home,ProductDetail,Error404,UpcomingProductDetail,MyAccount,MyAccountSignup,Profile,ProfileUpdate,AboutUs,ContactUs,BlogView,BlogDetail,Faq,Shop,filter_data
+from core import views
 
 urlpatterns = [
 
     #404 error page
-    path('404',Error404, name='404'),
+    path('404',views.Error404, name='404'),
 
     
     path('admin/', admin.site.urls),
-    path('base/', Base,name='base'),
-    path('',Home, name='home'),
-    path('about',AboutUs, name="about"),
-    path('contact',ContactUs, name='contact'),
-    path('blog', BlogView, name='blogs'),
-    path('faq',Faq, name='faq'),
+    path('base/', views.Base,name='base'),
+    path('',views.Home, name='home'),
+    path('about',views.AboutUs, name="about"),
+    path('contact',views.ContactUs, name='contact'),
+    path('blog', views.BlogView, name='blogs'),
+    path('faq',views.Faq, name='faq'),
     
-    path('blog/<slug:slug>',BlogDetail, name='blog_detail'),
-    path('shop',Shop, name='shop'),
-    path('shop/filter-data',filter_data,name="filter-data"),
+    path('blog/<slug:slug>',views.BlogDetail, name='blog_detail'),
+    path('shop',views.Shop, name='shop'),
+    path('shop/filter-data',views.filter_data,name="filter-data"),
 
-    path('product/<slug:slug>',ProductDetail, name='product_detail'),
-    path('products/<slug:slug>',UpcomingProductDetail, name='up_product_detail'),
-    path('account/login',MyAccount, name='handlelogin'),
-    path('account/register',MyAccountSignup, name='handlesignup'),
-    path('account/profile',Profile, name='profile'),
-    path('account/profile/update', ProfileUpdate, name='profile_update'),
-    
+    path('product/<slug:slug>',views.ProductDetail, name='product_detail'),
+    path('products/<slug:slug>',views.UpcomingProductDetail, name='up_product_detail'),
+    path('account/login',views.MyAccount, name='handlelogin'),
+    path('account/register',views.MyAccountSignup, name='handlesignup'),
+    path('account/profile',views.Profile, name='profile'),
+    path('account/profile/update', views.ProfileUpdate, name='profile_update'),
+
+    path('cart/add/<int:id>/', views.cart_add, name='cart_add'),
+    path('cart/item_clear/<int:id>/', views.item_clear, name='item_clear'),
+    path('cart/item_increment/<int:id>/',
+         views.item_increment, name='item_increment'),
+    path('cart/item_decrement/<int:id>/',
+         views.item_decrement, name='item_decrement'),
+    path('cart/cart_clear/', views.cart_clear, name='cart_clear'),
+    path('cart/cart-detail/',views.cart_detail,name='cart_detail'),
+    path('checkout/',views.Checkout,name='checkout'),
+    path('cart/checkout/placeorder', views.PlaceOrder, name='placeorder'),
+    path('success/',views.Success, name='success'),
+
+
     path('accounts/', include('django.contrib.auth.urls'))
 
 

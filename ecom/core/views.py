@@ -1,12 +1,19 @@
 from django.shortcuts import render,redirect
-from core.models import Slider,BannerArea,MainCategory,Product,UpcomingProduct,Blog,Category,Color,Brand
+from core.models import Slider,BannerArea,MainCategory,Product,UpcomingProduct,Blog,Category,Color,Brand,CouponCode,Order,OrderItem
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.template.loader import render_to_string
-from django.db.models import Max, Min
+from django.db.models import Max, Min, Sum
+from django.contrib.auth.decorators import login_required
+from django.conf import settings
+from cart.cart import Cart
+
+import razorpay
+
+client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
 
 
@@ -226,5 +233,160 @@ def ProfileUpdate(request):
         user.save()
         return  redirect('profile')
     
+
+@login_required(login_url="/accounts/login/")
+def cart_add(request, id):
+    cart = Cart(request)
+    product = Product.objects.get(id=id)
+    cart.add(product=product)
+    return redirect("cart_detail")
+
+
+@login_required(login_url="/accounts/login/")
+def item_clear(request, id):
+    cart = Cart(request)
+    product = Product.objects.get(id=id)
+    cart.remove(product)
+    return redirect("cart_detail")
+
+
+@login_required(login_url="/accounts/login/")
+def item_increment(request, id):
+    cart = Cart(request)
+    product = Product.objects.get(id=id)
+    cart.add(product=product)
+    return redirect("cart_detail")
+
+
+@login_required(login_url="/accounts/login/")
+def item_decrement(request, id):
+    cart = Cart(request)
+    product = Product.objects.get(id=id)
+    cart.decrement(product=product)
+    return redirect("cart_detail")
+
+
+@login_required(login_url="/accounts/login/")
+def cart_clear(request):
+    cart = Cart(request)
+    cart.clear()
+    return redirect("cart_detail")
+
+
+@login_required(login_url="/accounts/login/")
+def cart_detail(request):
+    cart = request.session.get('cart')
+    tax = sum(i.get('tax', 0) for i in cart.values() if i)
+
+    coupon = None
+    valid_coupon = None
+    invalid_coupon = None
+
+    if request.method =='GET':
+        coupon_code = request.GET.get('coupon_code')
+        if coupon_code:
+            try:
+                coupon = CouponCode.objects.get(code=coupon_code)
+                valid_coupon = "Are Applicable on Current Product"
+            except:
+                invalid_coupon = "Invalid Coupon code"
+
+
+    context = {
+        'tax' : tax,
+        'coupon' : coupon,
+        'valid_coupon' : valid_coupon,
+        'invalid_coupon' : invalid_coupon,
+
+
+    }
+    return render(request, 'cart/cart.html', context)
+
+
+def Checkout(request):
+    cart = request.session.get('cart')
+    tax = sum(i.get('tax', 0) for i in cart.values() if i)
+
+
+    payment = client.order.create(
+        {
+            "amount": 500, 
+            "currency": "INR",
+            "payment_capture" : "1"
+        }
+    )
+    
+    order_id = payment['id']
+
+    context = {
+        'tax' : tax,
+        'order_id' : order_id,
+        'payment' : payment,
+    }
+    return render(request, 'checkout/checkout.html', context)
+
+
+def PlaceOrder(request):
+    if request.method == 'POST':
+        uid = request.session.get('_auth_user_id')
+        user = User.objects.get(id = uid)
+        cart = request.session.get('cart')
+        print(cart)
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        address = request.POST.get('address')
+        city = request.POST.get('city')
+        district = request.POST.get('district')
+        postcode = request.POST.get('postcode')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+        amount = request.POST.get('amount')
+       
+
+        order_id = request.POST.get('order_id')
+        payment = request.POST.get('payment')
+
+        order = Order(
+            user = user,
+            first_name = first_name,
+            last_name = last_name,
+            address = address,
+            city = city,
+            district = district,
+            postcode = postcode,
+            email = email,
+            phone = phone,
+            payment_id = order_id,
+            amount = amount,
+            
+        )
+        order.save()
+        
+        for i in cart:
+
+            a = cart[i]['price']
+            b = cart[i]['quantity']
+
+            print(type(a))
+            print(type(b))
+
+            total = a * b
+            
+
+            item = OrderItem(
+                order = order,
+                product = cart[i]['product_name'],
+                quantity = cart[i]['quantity'],
+                price = cart[i]['price'],
+                total = total
+                
+            )
+            item.save()
+        
+        return render(request, 'checkout/placeorder.html')
+
+
+def Success(request):
+    return render(request, 'checkout/success.html')
 
     

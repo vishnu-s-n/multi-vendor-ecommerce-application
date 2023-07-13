@@ -2,7 +2,8 @@ from django.db import models
 from ckeditor.fields import RichTextField
 from django.utils.text import slugify
 from django.db.models.signals import pre_save
-
+from django.contrib.auth.models import User
+from datetime import datetime
 
 
 class Slider(models.Model):
@@ -82,6 +83,7 @@ class Product(models.Model):
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE, null=True)
     price = models.IntegerField()
     discount = models.IntegerField()
+    tax = models.IntegerField(null=True)
     product_information = RichTextField()
     model_name = models.CharField(max_length=100)
     categories = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -119,6 +121,13 @@ def pre_save_post_receiver(sender, instance, *args, **kwargs):
 pre_save.connect(pre_save_post_receiver, Product)
 
 
+
+class CouponCode(models.Model):
+    code = models.CharField(max_length=100)
+    discount = models.IntegerField()
+
+    def __str__(self) :
+        return self.code
 
     
 class ProductImages(models.Model):
@@ -216,4 +225,32 @@ def pre_save_post_receiver(sender, instance, *args, **kwargs):
 
 pre_save.connect(pre_save_post_receiver, Blog)
 
+
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    address = models.TextField()
+    city = models.CharField(max_length=100)
+    district = models.CharField(max_length=100)
+    postcode = models.IntegerField(null=True)
+    email = models.EmailField()
+    phone = models.IntegerField()
+    amount = models.CharField(max_length=100)
+    payment_id = models.CharField(max_length=100, null=True, blank=True)
+    paid = models.BooleanField(default=False, null=True)
+    date =models.DateField(default=datetime.today)
+
+    def __str__(self) :
+        return self.first_name
+    
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    product = models.CharField(max_length=100)
+    quantity = models.CharField(max_length=100)
+    price = models.CharField(max_length=100)
+    total = models.CharField(max_length=100)
+
+    def __str__(self) :
+        return self.product
     

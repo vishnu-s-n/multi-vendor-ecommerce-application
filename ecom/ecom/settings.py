@@ -39,8 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'ckeditor',
-    'ckeditor_uploader'
+    'ckeditor_uploader',
+    'cart',
 ]
+
+CART_SESSION_ID = 'cart'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -65,6 +68,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'cart.context_processor.cart_total_amount',
             ],
         },
     },
@@ -196,3 +200,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'helloopencart@gmail.com'
 EMAIL_HOST_PASSWORD = 'wprdxrvipftcsxsw'  
+
+
+RAZORPAY_KEY_ID = 'rzp_test_05AdCyeNjGQqYO'
+RAZORPAY_KEY_SECRET = 'IsFLwwyF1tWMXPndNDglhy0U'

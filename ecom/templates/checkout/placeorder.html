@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+{% load cart_tag %}
+<!-- cart-area-start -->
+<section class="cart-area pt-120 pb-120">
+    <div class="container">
+       <div class="row">
+          <div class="col-12">
+                <form action="#">
+                   <div class="table-content table-responsive">
+                      <table class="table">
+                            <thead>
+                               <tr>
+                                  <th class="product-thumbnail">Images</th>
+                                  <th class="cart-product-name">Product</th>
+                                  <th class="product-price">Unit Price</th>
+                                  <th class="product-quantity">Quantity</th>
+                                  <th class="product-subtotal">Total</th>
+                               </tr>
+                            </thead>
+                            <tbody>
+
+                                {% for key,value in request.session.cart.items %}
+                               <tr id="id{{value.id}}">
+                                  <td class="product-thumbnail"><img src="{{value.featured_image}}" alt=""></td>
+                                  <td class="product-name">{{value.product_name}} </td>
+                                  <td class="product-price "><span class="amount">₹ {{value.price}}</span></td>
+                                  <td class="product-quantity">
+
+
+                                    <div class="row">
+                                        
+                                        <div class="col-4">
+                                            <input type="text" value="{{value.quantity}}" class="text-center border-0">
+
+                                        </div>
+                                    </div>
+
+                                  </td>
+                                  <td class="product-subtotal"><span class="amount">₹ {{ value.price|multiply:value.quantity }}</span></td>
+                               </tr>
+                               {% endfor %}
+                               
+                            </tbody>
+                            
+                      </table>
+                      <td>
+                        <ul>
+                            <li class="fw-bold text-end me-2 mt-3"> <label class="border border-white shadow-sm p-2 mb-2 bg-body rounded">₹{{cart_total_amount}}</label></li>
+                        </ul>   
+                        
+                    </td>
+                      <a href="" class="tp-btn-h1 mt-4" >Place Order</a>
+
+                   </div>
+                   
+                  
+                </form>
+          </div>
+       </div>
+    </div>
+ </section>
+ <!-- cart-area-end -->
+
+{% endblock %}
